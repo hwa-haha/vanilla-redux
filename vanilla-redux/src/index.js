@@ -1,64 +1,72 @@
-import {createStore} from "redux";
+import { createStore } from "redux";
+const form = document.querySelector("form");
+const input = document.querySelector("input");
+const ul = document.querySelector("ul");
 
-const add = document.getElementById("add");
-const minus = document.getElementById("minus");
-const number = document.querySelector("span");
+const ADD_TODO = "ADD_TODO";
+const DELETE_TODO = "DELETE_TODO";
 
-number.innerText = 0;
-
-const ADD = "ADD";
-const MINUS ="MINUS";
-
-// data를 modify 해주는 함수로 reducer가 return하는 것은 application에 있는 data가 됨
-const countModifier = (count = 0, action) => {
-  switch (action.type){
-    case"ADD":
-      return count +1;
-    case"MINUS":
-      return count -1;
-    default:
-      return count;
-  }
+const addToDo = text => {
+  return {
+    type: ADD_TODO,
+    text
+  };
 };
 
-//Store는 data를 저장, CreateStore는 reducer를 요구
-const countStore = createStore(countModifier);
+const deleteToDo = id => {
+  return {
+    type: DELETE_TODO,
+    id
+  };
+};
 
-const onChange = () => {
-  number.innerText = countStore.getState();
-}
+const reducer = (state = [], action) => {
+  switch (action.type) {
+    case ADD_TODO:
+      const newToDoObj = { text: action.text, id: Date.now() };
+      return [newToDoObj, ...state];
+    case DELETE_TODO:
+      const cleaned = state.filter(toDo => toDo.id !== action.id);
+      return cleaned;
+    default:
+      return state;
+    }
+  };
 
-countStore.subscribe(onChange);
+const store = createStore(reducer);
+store.subscribe(() => console.log(store.getState()));
 
-const handleAdd = () => {
-  countStore.dispatch({type: ADD});
-}
+const dispatchAddToDo = text => {
+  store.dispatch(addToDo(text));
+};
 
-const handleMinus = () => {
-  countStore.dispatch({type: MINUS});
-}
+const dispatchDeleteToDo = e => {
+  const id = parseInt(e.target.parentNode.id);
+  store.dispatch(deleteToDo(id));
+};
 
-add.addEventListener("click", () => handleAdd);
-minus.addEventListener("click", () => handleMinus);
+const paintToDos = () => {
+  const toDos = store.getState();
+  ul.innerHTML = "";
+  toDos.forEach(toDo => {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.innerText = "DEL";
+    btn.addEventListener("click", dispatchDeleteToDo);
+    li.id = toDo.id;
+    li.innerText = toDo.text;
+    li.appendChild(btn);
+    ul.appendChild(li);
+  });
+};
 
+store.subscribe(paintToDos);
 
-// let count = 0;
-// number.innerText = count;
+const onSubmit = e => {
+  e.preventDefault();
+  const toDo = input.value;
+  input.value = "";
+  dispatchAddToDo(toDo);
+};
 
-// const updateText = () => {
-//   number.innerText = count;
-// }
-
-// const handleAdd = () => {
-//   count = count + 1;
-//   updateText();
-// }
-
-// const handleMinus = () => {
-//   count = count - 1;
-//   updateText();
-// }
-
-// add.addEventListener("click", handleAdd);
-// minus.addEventListener("click", handleMinus);
-
+form.addEventListener("submit", onSubmit);
