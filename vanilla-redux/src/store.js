@@ -1,5 +1,18 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 
+/*
+import storage from "redux-persist/lib/storage";
+import { persistReducer } from "redux-persist";
+
+const persistConfig = {
+key:"todo", //localStorage에 저장될 key값
+storage:storage
+};
+const allReducer = combineReducers({
+reducer
+});
+const store = createStore(persistReducer(persistConfig, allReducer));*/
+
 /*const addTodo = createAction("ADD");
 const deleteTodo = createAction("DELETE");
 
